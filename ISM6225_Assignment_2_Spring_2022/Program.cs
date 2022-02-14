@@ -7,7 +7,9 @@ WRITE YOUR CODE IN THE RESPECTIVE QUESTION FUNCTION BLOCK
 */
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ISM6225_Assignment_2_Spring_2022
 {
@@ -75,7 +77,7 @@ namespace ISM6225_Assignment_2_Spring_2022
 
             //Question 7:
             Console.WriteLine("Question 7:");
-            string bulls_string10 = "()[]{}";
+            string bulls_string10 = "(){}[]";
             bool isvalid = IsValid(bulls_string10);
             if (isvalid)
                 Console.WriteLine("Valid String");
@@ -103,8 +105,8 @@ namespace ISM6225_Assignment_2_Spring_2022
 
             //Question 10:
             Console.WriteLine("Question 10");
-            string word1  = "horse";
-            string word2 = "ros";
+            string word1  = "intention";
+            string word2 = "execution";
             int minLen = MinDistance( word1,  word2);
             Console.WriteLine("Minimum number of operations required are {0}", minLen);
             Console.WriteLine();
@@ -133,7 +135,37 @@ namespace ISM6225_Assignment_2_Spring_2022
             try
             {
                 //Write your Code here.
+                //Defining min and max which will change in the binary search
+                int min = 0;
+                int max = nums.Length - 1;
+                
+                while (min <= max)
+                {
+                    if (min == max & target < nums[min])//if target is less than nums[min],return min
+                    {
+                        return min;
+                    }
+                    else if (min == max & target > nums[min])//if larger, return min+1
+                    {
+                        return min + 1;
+                    }
+                    int mid = (min + max) / 2;//half point for binary search
+                    if (target == nums[mid])//if target is at mid point bingo!
+                    {
+                        return mid;
+                    }
+                    else if (target < nums[mid])//if target is less than the mid point, ignore the bigger half
+                    {
+                        max = mid - 1;//min to (mid-1)
+                    }
+                    else
+                    {
+                        min = mid + 1;//min becomes mid+1
+                    }
+                }
+
                 return -1;
+            
             }
             catch (Exception)
             {
@@ -163,14 +195,71 @@ namespace ISM6225_Assignment_2_Spring_2022
         {
             try
             {
-                
+
                 //write your code here.
+                //---------------------------Exception handling------------------------------------------
+                String allowedCharacters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz !?',;.";
+                if (paragraph.Length <1 || paragraph.Length > 1000)
+                {
+                    throw new Exception("String length should be between 1 and 1000");
+                }
+                foreach (char c in paragraph)
+                {                    
+                    if (!allowedCharacters.Contains(c.ToString()))
+                        throw new Exception("String contains unacceptable characters");
+                }
+                if(banned.Length < 1 || banned.Length > 100)
+                {
+                    throw new Exception("banned array length is invalid");
+                }
+                foreach(string s in banned)
+                {
+                    if(s.Length<1 || s.Length > 10)
+                    {
+                        throw new Exception("banned string length is invalid");
+                    }                    
+                }
+                //--------------------------------------------------------------------------------------
+                string[] para_words = paragraph.ToLower().Split(new char[] { ' ', ',','.' }, StringSplitOptions.RemoveEmptyEntries);
+                //This splits the paragraph into a string array and converts it to lower case letters
+               
+                Dictionary<string, int> RepeatedWordCount = new Dictionary<string, int>();
+                //This dictionary will hold the distinct word as key and its count as the value
+
+                for (int i = 0; i < para_words.Length; i++) //loop the splited string  
+                {
+                    if (RepeatedWordCount.ContainsKey(para_words[i])) // Check if word already exist in dictionary update the count  
+                    {
+                        int value = RepeatedWordCount[para_words[i]];
+                        RepeatedWordCount[para_words[i]] = value + 1;
+                    }
+                    else
+                    {
+                        RepeatedWordCount.Add(para_words[i], 1);  // if a string is repeated and not added in dictionary , here we are adding   
+                    }
+                }
+                //this sorts the dictionary on the basis of value in descending order
+                Dictionary<string, int> sortedDict = new Dictionary<string, int>(from entry in RepeatedWordCount orderby entry.Value descending select entry);
+                
+                foreach (KeyValuePair<string, int> kvp in sortedDict)
+                {
+                    if(banned.Contains(kvp.Key)) //if banned contains the repeated value, we skip the loop to next step
+                    {
+                        continue;
+                    }  
+                    else
+                    {
+                        return kvp.Key; // if not, we return the key
+                    }
+                }
 
                 return "";
-            }
-            catch (Exception)
-            {
 
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
                 throw;
             }
         }
@@ -201,11 +290,52 @@ namespace ISM6225_Assignment_2_Spring_2022
             try
             {
                 //write your code here.
-                return 0;
-            }
-            catch (Exception)
-            {
+                //---------------------------Exception Handling---------------------------------
+                if(arr.Length < 1 || arr.Length > 500)
+                {
+                    throw new Exception("array length should be between 1 and 500");
+                }
+                for(int i = 0; i < arr.Length; i++)
+                {
+                    if(arr[i] < 1 || arr[i] > 500)
+                    {
+                        throw new Exception("array element should be between 1 and 500");
 
+                    }
+                }
+                //------------------------------------------------------------------------------
+                Dictionary<int, int> RepeatedWordCount = new Dictionary<int, int>();
+                //create a dictionary that will keep track of count of number in array
+                for (int i = 0; i < arr.Length; i++) //loop the splited string  
+                {
+                    if (RepeatedWordCount.ContainsKey(arr[i])) // Check if int already exist in dictionary update the count  
+                    {
+                        int value = RepeatedWordCount[arr[i]];
+                        RepeatedWordCount[arr[i]] = value + 1;
+                    }
+                    else
+                    {
+                        RepeatedWordCount.Add(arr[i], 1);  // if an int is repeated and not added in dictionary , here we are adding   
+                    }
+                }
+
+                //sorting the created dictionaty in descending order
+                Dictionary<int, int> sortedDict = new Dictionary<int, int>(from entry in RepeatedWordCount orderby entry.Value descending select entry);
+                
+                foreach(KeyValuePair<int, int> kvp in sortedDict)
+                {
+                    if (kvp.Key == kvp.Value) //for lucky number, the number and frequency should be same
+                    {
+                        return kvp.Key;
+                    }
+
+                }
+                //if lucky number not found return -1
+                return -1;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
                 throw;
             }
 
@@ -236,7 +366,59 @@ namespace ISM6225_Assignment_2_Spring_2022
             try
             {
                 //write your code here.
-                return "";
+
+                //----------------------------exception handling-----------------------------
+                string allowablechars = "1234567890";
+                if(secret.Length< 1 || secret.Length > 1000 )
+                {
+                    throw new Exception("Length of secret should be between 1 and 1000");
+                }
+                if (guess.Length < 1 || guess.Length > 1000)
+                {
+                    throw new Exception("Length of guess should be between 1 and 1000");
+                }
+                if(guess.Length != secret.Length)
+                {
+                    throw new Exception("Length of guess and secret should be the same");
+                }
+                foreach (char c in secret)
+                {
+                    if (!allowablechars.Contains(c.ToString()))
+                        throw new Exception("secret contains unacceptable characters");
+                }
+                foreach (char c in guess)
+                {
+                    if (!allowablechars.Contains(c.ToString()))
+                        throw new Exception("guess contains unacceptable characters");
+                }
+                //---------------------------------------------------------------------------
+                int bullcount = 0;
+                int cowcount = 0;
+                int count = 0;
+                
+                for(int i = 0;i<secret.Length;i++)
+                {
+                    count = 0;//this will keep the count, if two counts in same loop, we will minus the plus
+                    for(int j=0;j<guess.Length;j++)
+                    {
+                        if(secret[i] ==guess[j] & i!=j)
+                        {
+                            cowcount++;
+                            count++;
+                        }
+                        if(secret[i] == guess[j] & i==j)
+                        {
+                            bullcount++;
+                            break;
+                        }
+                        if(count>1)
+                        {
+                            cowcount--;//same position twice cancel the addition by doing a subtraction
+                        }    
+                    }
+                }
+
+                return bullcount+"A"+cowcount+"B";
             }
             catch (Exception)
             {
@@ -266,8 +448,23 @@ namespace ISM6225_Assignment_2_Spring_2022
             try
             {
                 //write your code here.
-                
-                return new List<int>() {} ;
+                int[] last = new int[26];
+                for (int i = 0; i < s.Length; ++i)
+                    last[s.ElementAt(i) - 'a'] = i;//first element's last position - 'a'
+
+                int j = 0, anchor = 0;
+                List<int> ans = new List<int>();
+                for (int i = 0; i < s.Length; ++i)
+                {
+                    j = Math.Max(j, last[s.ElementAt(i) - 'a']);//Max position till where you can hold it
+                    if (i == j)
+                    {
+                        ans.Add(i - anchor + 1);//increment anchor and add that position to ans
+                        anchor = i + 1;
+                    }
+                }
+                return ans;
+            
             }
             catch (Exception)
             {
@@ -311,8 +508,55 @@ namespace ISM6225_Assignment_2_Spring_2022
             try
             {
                 //write your code here.
+                //----------------------------------exception handling-----------------------------
+                if(widths.Length != 26)
+                {
+                    throw new Exception("Please enter correct 26 widths");
+                }
+                for(int i=0; i<widths.Length; ++i)
+                {
+                    if(widths[i] < 2 || widths[i] > 10)
+                    {
+                        throw new Exception("widths length should be between 2 and 10");
+                    }
+                }
+                if(s.Length < 1 || s.Length > 1000)
+                {
+                    throw new Exception("s length should be between 1 and 1000");
+                }
+                
+                foreach(char c in s)
+                {
+                    if(Char.IsUpper(c))
+                    {
+                        throw new Exception("Only lowercase allowed in s");
+                    }
+                }
+                //---------------------------------------------------------------------------------
+                String alph = "abcdefghijklmnopqrstuvwxyz";
+                char[] alph_char = alph.ToCharArray();
+                List<int> ans = new List<int>();
+                int count = 0;
+                int line_count = 1;
+                int pos;
+                foreach (char c in s)
+                {
+                    pos = alph.IndexOf(c);//to get position of character in alphabets
+                    if (count+widths[pos] <= 100)
+                    {
+                        count = count + widths[pos];//add count until it is less than 100
+                    }
 
-                return new List<int>() { };
+                    else
+                    {
+                        count = 0;
+                        count = count + widths[pos];//set count to 0, add the currect value to count,and increase line count
+                        line_count++;
+                    }
+                }
+                ans.Add(line_count);
+                ans.Add(count);
+                return ans;
             }
             catch (Exception)
             {
@@ -350,8 +594,50 @@ namespace ISM6225_Assignment_2_Spring_2022
             try
             {
                 //write your code here.
+                //-----------------------------exception handling----------------------------
+                if(bulls_string10.Length< 1 || bulls_string10.Length > 10000)
+                {
+                    throw new Exception("bulls_string length should be between 1 and 10000");
+                }
+                foreach(char c in bulls_string10)
+                {
+                    if(c=='(' || c==')' || c == '[' || c == ']' || c == '{' || c == '}')
+                    {
+                        
+                    }
+                    else
+                    {
+                        throw new Exception("only (){}[] allowed");
+                    }
+                }
+                //---------------------------------------------------------------------------
+                Stack<char> AcceptableSymbols = new Stack<char>();//stack to push and pop elements
+                foreach (char c in bulls_string10)
+                {
+                    if(c =='(' || c=='{' || c == '[')
+                    {
+                        AcceptableSymbols.Push(c);//opening braces get pushed into the stack
+                    }
+                    else if(c==')' & AcceptableSymbols.Count != 0 & AcceptableSymbols.Peek() == '(')//if last element is not the opening bracket of the same time
+                                                                                                    //return false, else pop off the element
+                    {
+                        AcceptableSymbols.Pop();
+                    }
+                    else if (c == '}' & AcceptableSymbols.Count != 0 & AcceptableSymbols.Peek() == '{')
+                    {
+                        AcceptableSymbols.Pop();
+                    }
+                    else if (c == ']' & AcceptableSymbols.Count != 0 & AcceptableSymbols.Peek() == '[')
+                    {
+                        AcceptableSymbols.Pop();
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
 
-                return false;
+                return AcceptableSymbols.Count==0;//stack should be empty, if yes return true, else return false
             }
             catch (Exception)
             {
@@ -393,8 +679,46 @@ namespace ISM6225_Assignment_2_Spring_2022
             try
             {
                 //write your code here.
+                //------------------------------exception handling----------------------
+                if(words.Length<1||words.Length>100)
+                {
+                    throw new Exception("words length should be between 1 and 100");
+                }
+                foreach (string s in words)
+                {
+                    if (s.Length < 1 || s.Length >12)
+                    {
+                        throw new Exception("length of individual word  should be between 1 and 12");
+                    }
+                    foreach(char c in s)
+                    {
+                        if(Char.IsUpper(c))
+                        {
+                            throw new Exception("only lower case allowed");
+                        }
+                    }
+                }
 
-                return 0;
+                //----------------------------------------------------------------------
+                String[] morse = new String[]{".-", "-...", "-.-.", "-..", ".", "..-.", "--.", "....", "..", ".---", "-.-", ".-..", "--", "-.", "---", ".--.", "--.-", ".-.", "...", "-", "..-", "...-", ".--", "-..-", "-.--", "--.."};
+                String alph = "abcdefghijklmnopqrstuvwxyz";
+                List<string> list = new List<string>();
+                String a = "";//acts as dummy string to add to
+                int loc;
+                foreach(string s in words)
+                {
+                    foreach(char c in s)
+                    {
+                        loc = alph.IndexOf(c);//find location in alphabets
+                        a = a + morse[loc];//add the morse code to a
+                    }
+                    list.Add(a);
+                    a = "";//after words end ,reset a
+                }
+               
+                
+                var distinct_morse_conv = list.Distinct().ToArray();
+                return distinct_morse_conv.Length;
             }
             catch (Exception)
             {
@@ -426,6 +750,7 @@ namespace ISM6225_Assignment_2_Spring_2022
             try
             {
                 //write your code here.
+                
                 return 0;
             }
             catch (Exception)
@@ -461,6 +786,60 @@ namespace ISM6225_Assignment_2_Spring_2022
             try
             {
                 //write your code here.
+                int rows = word1.Length + 1;
+                int cols = word2.Length + 1;
+
+                // corner case: at least one of the words are empty
+                if (rows == 0)
+                {
+                    return cols;
+                }
+                else if (cols == 0)
+                {
+                    return rows;
+                }
+
+                // fill up dist[][] table
+                int[,] dist = new int[rows + 1,cols + 1];
+                for (int row = 0; row < rows; ++row)
+                {
+                    for (int col = 0; col < cols; ++col)
+                    {
+                        // top row / left column
+                        if (row == 0)
+                        {
+                            dist[row,col] = col;
+                        }
+                        else if (col == 0)
+                        {
+                            dist[row,col] = row;
+                        }
+                        // transtion cells
+                        else
+                        {
+                            // case 1: last letters of two substrings are equal
+                            if (word1.ElementAt(row - 1) == word2.ElementAt(col - 1))
+                            {
+                                dist[row,col] = dist[row - 1,col - 1];
+                            }
+                            // case 2: last letters of two substrings are different
+                            else
+                            {
+                                dist[row,col] = Int32.MaxValue;
+                                // 1. check up left (last edit is replace)
+                                dist[row,col] = Math.Min(dist[row,col], dist[row - 1,col - 1] + 1);
+                                // 2. check up (last edit is append word1[row-1])
+                                dist[row,col] = Math.Min(dist[row,col], dist[row - 1,col] + 1);
+                                // 3. check left (last edit is append word2[col-1])
+                                dist[row,col] = Math.Min(dist[row,col], dist[row,col - 1] + 1);
+                            }
+                        }
+                    }
+                }
+
+                return dist[rows - 1,cols - 1];
+            
+            
                 return 0;
 
             }
